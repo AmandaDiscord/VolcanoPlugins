@@ -57,7 +57,7 @@ class DeezerPlugin {
 	* @param {boolean} isResourceSearch
 	*/
 	async infoHandler(resource, isResourceSearch) {
-		const html = await fetch(isResourceSearch ? `https://www.deezer.com/search/${resource}` : resource).then(d => d.text());
+		const html = await fetch(isResourceSearch ? `https://www.deezer.com/search/${encodeURIComponent(resource)}` : resource).then(d => d.text());
 		const data = DeezerPlugin.parse(html);
 		if (data.QUERY) return { entries: data.TRACK.data.map(DeezerPlugin.trackToResource) };
 		else if (data.DATA.__TYPE__ === "song") return { entries: [DeezerPlugin.trackToResource(data.DATA)] };
