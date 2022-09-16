@@ -45,17 +45,17 @@ class DeezerPlugin {
 	}
 
 	/**
-	* @param {string} resource
-	* @param {boolean} isResourceSearch
-	*/
+	 * @param {string} resource
+	 * @param {boolean} isResourceSearch
+	 */
 	canBeUsed(resource, isResourceSearch) {
 		return isResourceSearch || !!resource.match(usableRegex);
 	}
 
 	/**
-	* @param {string} resource
-	* @param {boolean} isResourceSearch
-	*/
+	 * @param {string} resource
+	 * @param {boolean} isResourceSearch
+	 */
 	async infoHandler(resource, isResourceSearch) {
 		const html = await fetch(isResourceSearch ? `https://www.deezer.com/search/${encodeURIComponent(resource)}` : resource).then(d => d.text());
 		const data = DeezerPlugin.parse(html);

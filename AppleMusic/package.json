@@ -1,0 +1,27 @@
+{
+  "name": "volcano-itunes",
+  "version": "1.0.0",
+  "description": "A plugin for Volcano to support playback from iTunes",
+  "main": "AppleMusicPlugin.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/AmandaDiscord/VolcanoPlugins.git"
+  },
+  "keywords": [
+    "volcano",
+    "itunes"
+  ],
+  "author": "PapiOphidian",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/AmandaDiscord/VolcanoPlugins/issues"
+  },
+  "homepage": "https://github.com/AmandaDiscord/VolcanoPlugins#readme",
+  "dependencies": {
+    "@discordjs/voice": "^0.11.0",
+    "@lavalink/encoding": "^0.1.2"
+  }
+}
