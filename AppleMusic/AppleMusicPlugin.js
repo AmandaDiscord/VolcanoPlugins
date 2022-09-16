@@ -72,7 +72,6 @@ class AppleMusicPlugin {
 		const match = resource.match(usableRegex);
 		if (!match) throw new Error("UNKNOWN_OR_UNSUPPORTED_RESOURCE");
 		const data = await fetch(`https://itunes.apple.com/lookup?id=${match[3] || match[2]}&entity=song&limit=10`).then(d => d.json());
-		console.log(data);
 		const filtered = data.results.filter(i => i.wrapperType === "track");
 		return {
 			entries: filtered.map(i => ({
