@@ -18,7 +18,7 @@
 /**
  * @typedef {Object} PluginInterface
  *
- * @property {(logger: Logger) => unknown} [setVariables]
+ * @property {(logger: Logger, utils: any) => unknown} [setVariables]
  * @property {() => unknown} [initialize]
  * @property {(filters: Array<string>, options: Record<any, any>) => unknown} [mutateFilters]
  * @property {(url: URL, req: import("http").IncomingMessage, res: import("http").ServerResponse) => unknown} [routeHandler]
@@ -31,7 +31,6 @@
  */
 
 import { isMainThread } from "worker_threads";
-import { Readable } from "stream";
 
 import { TwitterScraper } from "@tcortega/twitter-scraper";
 
@@ -43,6 +42,10 @@ const twitterCoRegex = /https:\/\/t.co\/\w+/
 class TwitterPlugin {
 	constructor() {
 		this.source = "twitter";
+	}
+
+	setVariables(_, utils) {
+		this.utils = utils;
 	}
 
 	async initialize() {
@@ -73,8 +76,7 @@ class TwitterPlugin {
 	/** @param {import("@lavalink/encoding").TrackInfo} info */
 	async streamHandler(info) {
 		if (!info.uri) throw new Error("NO_URI");
-		// @ts-ignore
-		return fetch(info.uri, { redirect: "follow" }).then(d => ({ stream: Readable.fromWeb(d.body) }));
+		return this.utils.connect(info.uri);
 	}
 }
 

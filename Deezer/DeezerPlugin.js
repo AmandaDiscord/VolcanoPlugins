@@ -18,7 +18,7 @@
 /**
  * @typedef {Object} PluginInterface
  *
- * @property {(logger: Logger) => unknown} [setVariables]
+ * @property {(logger: Logger, utils: any) => unknown} [setVariables]
  * @property {() => unknown} [initialize]
  * @property {(filters: Array<string>, options: Record<any, any>) => unknown} [mutateFilters]
  * @property {(url: URL, req: import("http").IncomingMessage, res: import("http").ServerResponse) => unknown} [routeHandler]
@@ -30,8 +30,6 @@
  * @property {(info: import("@lavalink/encoding").TrackInfo, usingFFMPEG: boolean) => { type?: import("@discordjs/voice").StreamType; stream: import("stream").Readable } | Promise<{ type?: import("@discordjs/voice").StreamType; stream: import("stream").Readable }>} [streamHandler]
  */
 
-import { Readable } from "stream";
-
 import htmlParse from "node-html-parser";
 
 const usableRegex = /^https:\/\/www\.deezer\.com\/\w+\/(track|album|artist)\/(\d+)$/;
@@ -42,6 +40,10 @@ class DeezerPlugin {
 	constructor() {
 		this.source = "deezer";
 		this.searchShort = "dz";
+	}
+
+	setVariables(_, utils) {
+		this.utils = utils;
 	}
 
 	/**
@@ -75,8 +77,7 @@ class DeezerPlugin {
 		const html = await fetch(info.uri).then(d => d.text());
 		const data = DeezerPlugin.parse(html);
 		const chosen = data.DATA.MEDIA.find(i => i.TYPE !== "preview") || data.DATA.MEDIA[0];
-		// @ts-ignore
-		return fetch(chosen.HREF, { redirect: "follow" }).then(d => ({ stream: Readable.fromWeb(d.body) }));
+		return this.utils.connect(chosen.HREF);
 	}
 
 	/** @param {string} html */
