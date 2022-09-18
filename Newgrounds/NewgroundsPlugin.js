@@ -106,7 +106,7 @@ class NewgroundsPlugin {
 	/** @param {import("@lavalink/encoding").TrackInfo} info */
 	async streamHandler(info) {
 		if (!info.uri) throw new Error("NO_URI");
-		return this.utils.connect(info.uri);
+		return { stream: await this.utils.connect(info.uri) };
 	}
 }
 

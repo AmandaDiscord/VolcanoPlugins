@@ -36,7 +36,7 @@ import { TwitterScraper } from "@tcortega/twitter-scraper";
 
 
 const usableRegex = /^https:\/\/twitter.com\/([^/]+)\/status\/(\d+)/;
-const twitterCoRegex = /https:\/\/t.co\/\w+/
+const twitterCoRegex = /https:\/\/t.co\/\w+/;
 
 /** @implements {PluginInterface} */
 class TwitterPlugin {
@@ -76,7 +76,7 @@ class TwitterPlugin {
 	/** @param {import("@lavalink/encoding").TrackInfo} info */
 	async streamHandler(info) {
 		if (!info.uri) throw new Error("NO_URI");
-		return this.utils.connect(info.uri);
+		return { stream: await this.utils.connect(info.uri) };
 	}
 }
 
