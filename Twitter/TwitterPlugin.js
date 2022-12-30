@@ -1,51 +1,20 @@
-/**
- * @typedef {Object} TrackInfo
- * @property {string} title
- * @property {string} author
- * @property {string} identifier
- * @property {string} uri
- * @property {number} length
- * @property {boolean} isStream
- */
-
-/**
- * @typedef {Object} Logger
- * @property {(message: any, worker?: string) => void} info
- * @property {(message: any, worker?: string) => void} error
- * @property {(message: any, worker?: string) => void} warn
- */
-
-/**
- * @typedef {Object} PluginInterface
- *
- * @property {(logger: Logger, utils: any) => unknown} [setVariables]
- * @property {() => unknown} [initialize]
- * @property {(filters: Array<string>, options: Record<any, any>) => unknown} [mutateFilters]
- * @property {(url: URL, req: import("http").IncomingMessage, res: import("http").ServerResponse) => unknown} [routeHandler]
- * @property {(packet: Record<any, any>, socket: import("ws").WebSocket) => unknown} [onWSMessage]
- * @property {string} [source]
- * @property {string} [searchShort]
- * @property {(resource: string, isResourceSearch: boolean) => boolean} [canBeUsed]
- * @property {(resource: string, isResourceSearch: boolean) => { entries: Array<TrackInfo>, plData?: { name: string; selectedTrack?: number; } } | Promise<{ entries: Array<TrackInfo>, plData?: { name: string; selectedTrack?: number; } }>} [infoHandler]
- * @property {(info: import("@lavalink/encoding").TrackInfo, usingFFMPEG: boolean) => { type?: import("@discordjs/voice").StreamType; stream: import("stream").Readable } | Promise<{ type?: import("@discordjs/voice").StreamType; stream: import("stream").Readable }>} [streamHandler]
- */
-
 import { isMainThread } from "worker_threads";
 
 import { TwitterScraper } from "@tcortega/twitter-scraper";
 
+import { Plugin } from "volcano-sdk";
 
 const usableRegex = /^https:\/\/twitter.com\/([^/]+)\/status\/(\d+)/;
 const twitterCoRegex = /https:\/\/t.co\/\w+/;
 
-/** @implements {PluginInterface} */
-class TwitterPlugin {
-	constructor() {
+class TwitterPlugin extends Plugin {
+	/**
+	 * @param {import("volcano-sdk/types").Logger} _
+	 * @param {import("volcano-sdk/types").Utils} utils
+	 */
+	constructor(_, utils) {
+		super(_, utils);
 		this.source = "twitter";
-	}
-
-	setVariables(_, utils) {
-		this.utils = utils;
 	}
 
 	async initialize() {
@@ -53,8 +22,8 @@ class TwitterPlugin {
 	}
 
 	/**
- * @param {string} resource
- */
+	 * @param {string} resource
+	 */
 	canBeUsed(resource) {
 		return !!resource.match(usableRegex);
 	}
@@ -73,7 +42,6 @@ class TwitterPlugin {
 		return { entries: [{ title: data.description?.replace(twitterCoRegex, "").trim() || "No tweet description", author: match[1], identifier: match[1], uri: mp4.url, length: 0, isStream: false }] };
 	}
 
-	/** @param {import("@lavalink/encoding").TrackInfo} info */
 	async streamHandler(info) {
 		if (!info.uri) throw new Error("NO_URI");
 		return { stream: await this.utils.connect(info.uri) };

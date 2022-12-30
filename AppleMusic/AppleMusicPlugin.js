@@ -1,62 +1,32 @@
-/**
- * @typedef {Object} TrackInfo
- * @property {string} title
- * @property {string} author
- * @property {string} identifier
- * @property {string} uri
- * @property {number} length
- * @property {boolean} isStream
- */
-
-/**
- * @typedef {Object} Logger
- * @property {(message: any, worker?: string) => void} info
- * @property {(message: any, worker?: string) => void} error
- * @property {(message: any, worker?: string) => void} warn
- */
-
-/**
- * @typedef {Object} PluginInterface
- *
- * @property {(logger: Logger, utils: any) => unknown} [setVariables]
- * @property {() => unknown} [initialize]
- * @property {(filters: Array<string>, options: Record<any, any>) => unknown} [mutateFilters]
- * @property {(url: URL, req: import("http").IncomingMessage, res: import("http").ServerResponse) => unknown} [routeHandler]
- * @property {(packet: Record<any, any>, socket: import("ws").WebSocket) => unknown} [onWSMessage]
- * @property {string} [source]
- * @property {string} [searchShort]
- * @property {(resource: string, isResourceSearch: boolean) => boolean} [canBeUsed]
- * @property {(resource: string, isResourceSearch: boolean) => { entries: Array<TrackInfo>, plData?: { name: string; selectedTrack?: number; } } | Promise<{ entries: Array<TrackInfo>, plData?: { name: string; selectedTrack?: number; } }>} [infoHandler]
- * @property {(info: import("@lavalink/encoding").TrackInfo, usingFFMPEG: boolean) => { type?: import("@discordjs/voice").StreamType; stream: import("stream").Readable } | Promise<{ type?: import("@discordjs/voice").StreamType; stream: import("stream").Readable }>} [streamHandler]
- */
+import { Plugin } from "volcano-sdk";
 
 const usableRegex = /^https:\/\/music\.apple\.com\/[^/]+\/(album|artist)\/[^/]+\/(\d+)(?:\?i=(\d+))?$/;
 
-/** @implements {PluginInterface} */
-class AppleMusicPlugin {
-	constructor() {
+class AppleMusicPlugin extends Plugin {
+	/**
+	 * @param {import("volcano-sdk/types").Logger} _
+	 * @param {import("volcano-sdk/types").Utils} utils
+	 */
+	constructor(_, utils) {
+		super(_, utils);
 		this.source = "itunes";
-		this.searchShort = "am";
-	}
-
-	setVariables(_, utils) {
-		this.utils = utils;
+		this.searchShorts = ["am"];
 	}
 
 	/**
 	 * @param {string} resource
-	 * @param {boolean} isResourceSearch
+	 * @param {string} [searchShort]
 	 */
-	canBeUsed(resource, isResourceSearch) {
-		return isResourceSearch || !!resource.match(usableRegex);
+	canBeUsed(resource, searchShort) {
+		return (searchShort && this.searchShorts.includes(searchShort)) || !!resource.match(usableRegex);
 	}
 
 	/**
 	 * @param {string} resource
-	 * @param {boolean} isResourceSearch
+	 * @param {string} [searchShort]
 	 */
-	async infoHandler(resource, isResourceSearch) {
-		if (isResourceSearch) {
+	async infoHandler(resource, searchShort) {
+		if (searchShort) {
 			const data = await fetch(`https://itunes.apple.com/search?term=${encodeURIComponent(resource)}&country=US&entity=song&limit=10`).then(d => d.json());
 			return {
 				entries: data.results.map(i => ({
@@ -86,7 +56,6 @@ class AppleMusicPlugin {
 		};
 	}
 
-	/** @param {import("@lavalink/encoding").TrackInfo} info */
 	async streamHandler(info) {
 		if (!info.uri) throw new Error("NO_URI");
 		return { stream: await this.utils.connect(info.uri) };

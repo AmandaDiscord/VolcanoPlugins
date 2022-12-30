@@ -1,65 +1,35 @@
-/**
- * @typedef {Object} TrackInfo
- * @property {string} title
- * @property {string} author
- * @property {string} identifier
- * @property {string} uri
- * @property {number} length
- * @property {boolean} isStream
- */
-
-/**
- * @typedef {Object} Logger
- * @property {(message: any, worker?: string) => void} info
- * @property {(message: any, worker?: string) => void} error
- * @property {(message: any, worker?: string) => void} warn
- */
-
-/**
- * @typedef {Object} PluginInterface
- *
- * @property {(logger: Logger, utils: any) => unknown} [setVariables]
- * @property {() => unknown} [initialize]
- * @property {(filters: Array<string>, options: Record<any, any>) => unknown} [mutateFilters]
- * @property {(url: URL, req: import("http").IncomingMessage, res: import("http").ServerResponse) => unknown} [routeHandler]
- * @property {(packet: Record<any, any>, socket: import("ws").WebSocket) => unknown} [onWSMessage]
- * @property {string} [source]
- * @property {string} [searchShort]
- * @property {(resource: string, isResourceSearch: boolean) => boolean} [canBeUsed]
- * @property {(resource: string, isResourceSearch: boolean) => { entries: Array<TrackInfo>, plData?: { name: string; selectedTrack?: number; } } | Promise<{ entries: Array<TrackInfo>, plData?: { name: string; selectedTrack?: number; } }>} [infoHandler]
- * @property {(info: import("@lavalink/encoding").TrackInfo, usingFFMPEG: boolean) => { type?: import("@discordjs/voice").StreamType; stream: import("stream").Readable } | Promise<{ type?: import("@discordjs/voice").StreamType; stream: import("stream").Readable }>} [streamHandler]
- */
+import { Plugin } from "volcano-sdk";
 
 import htmlParse from "node-html-parser";
 
 const usableRegex = /^https:\/\/www\.deezer\.com\/\w+\/(track|album|artist)\/(\d+)$/;
 const scriptSliceAfter = "window.__DZR_APP_STATE__ = ".length;
 
-/** @implements {PluginInterface} */
-class DeezerPlugin {
-	constructor() {
+class DeezerPlugin extends Plugin {
+	/**
+	 * @param {import("volcano-sdk/types").Logger} _
+	 * @param {import("volcano-sdk/types").Utils} utils
+	 */
+	constructor(_, utils) {
+		super(_, utils)
 		this.source = "deezer";
-		this.searchShort = "dz";
-	}
-
-	setVariables(_, utils) {
-		this.utils = utils;
+		this.searchShorts = ["dz"];
 	}
 
 	/**
 	 * @param {string} resource
-	 * @param {boolean} isResourceSearch
+	 * @param {string} [searchShort]
 	 */
-	canBeUsed(resource, isResourceSearch) {
-		return isResourceSearch || !!resource.match(usableRegex);
+	canBeUsed(resource, searchShort) {
+		return (searchShort && this.searchShorts.includes(searchShort)) || !!resource.match(usableRegex);
 	}
 
 	/**
 	 * @param {string} resource
-	 * @param {boolean} isResourceSearch
+	 * @param {string} [searchShort]
 	 */
-	async infoHandler(resource, isResourceSearch) {
-		const html = await fetch(isResourceSearch ? `https://www.deezer.com/search/${encodeURIComponent(resource)}` : resource).then(d => d.text());
+	async infoHandler(resource, searchShort) {
+		const html = await fetch(searchShort ? `https://www.deezer.com/search/${encodeURIComponent(resource)}` : resource).then(d => d.text());
 		const data = DeezerPlugin.parse(html);
 		if (data.QUERY) return { entries: data.TRACK.data.map(DeezerPlugin.trackToResource) };
 		else if (data.DATA.__TYPE__ === "song") return { entries: [DeezerPlugin.trackToResource(data.DATA)] };
@@ -71,13 +41,12 @@ class DeezerPlugin {
 		else throw new Error("UNKNOWN_OR_UNSUPPORTED_DEEZER_RESOURCE");
 	}
 
-	/** @param {import("@lavalink/encoding").TrackInfo} info */
 	async streamHandler(info) {
 		if (!info.uri) throw new Error("NO_URI");
 		const html = await fetch(info.uri).then(d => d.text());
 		const data = DeezerPlugin.parse(html);
 		const chosen = data.DATA.MEDIA.find(i => i.TYPE !== "preview") || data.DATA.MEDIA[0];
-		return this.utils.connect(chosen.HREF);
+		return { stream: await this.utils.connect(chosen.HREF) };
 	}
 
 	/** @param {string} html */

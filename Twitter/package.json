@@ -21,8 +21,7 @@
   },
   "homepage": "https://github.com/AmandaDiscord/VolcanoPlugins#readme",
   "dependencies": {
-    "@discordjs/voice": "^0.11.0",
-    "@lavalink/encoding": "^0.1.2",
-    "@tcortega/twitter-scraper": "github:AmandaDiscord/twitter-scraper#e7ac0766f2fc53e6873401372dfe040e0ff33a3e"
+    "@tcortega/twitter-scraper": "github:AmandaDiscord/twitter-scraper#e7ac0766f2fc53e6873401372dfe040e0ff33a3e",
+    "volcano-sdk": "github:AmandaDiscord/VolcanoSDK"
   }
 }

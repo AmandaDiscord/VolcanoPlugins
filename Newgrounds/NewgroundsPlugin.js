@@ -1,64 +1,34 @@
-/**
- * @typedef {Object} TrackInfo
- * @property {string} title
- * @property {string} author
- * @property {string} identifier
- * @property {string} uri
- * @property {number} length
- * @property {boolean} isStream
- */
-
-/**
- * @typedef {Object} Logger
- * @property {(message: any, worker?: string) => void} info
- * @property {(message: any, worker?: string) => void} error
- * @property {(message: any, worker?: string) => void} warn
- */
-
-/**
- * @typedef {Object} PluginInterface
- *
- * @property {(logger: Logger, utils: any) => unknown} [setVariables]
- * @property {() => unknown} [initialize]
- * @property {(filters: Array<string>, options: Record<any, any>) => unknown} [mutateFilters]
- * @property {(url: URL, req: import("http").IncomingMessage, res: import("http").ServerResponse) => unknown} [routeHandler]
- * @property {(packet: Record<any, any>, socket: import("ws").WebSocket) => unknown} [onWSMessage]
- * @property {string} [source]
- * @property {string} [searchShort]
- * @property {(resource: string, isResourceSearch: boolean) => boolean} [canBeUsed]
- * @property {(resource: string, isResourceSearch: boolean) => { entries: Array<TrackInfo>, plData?: { name: string; selectedTrack?: number; } } | Promise<{ entries: Array<TrackInfo>, plData?: { name: string; selectedTrack?: number; } }>} [infoHandler]
- * @property {(info: import("@lavalink/encoding").TrackInfo, usingFFMPEG: boolean) => { type?: import("@discordjs/voice").StreamType; stream: import("stream").Readable } | Promise<{ type?: import("@discordjs/voice").StreamType; stream: import("stream").Readable }>} [streamHandler]
- */
+import { Plugin } from "volcano-sdk";
 
 import htmlParse from "node-html-parser";
 
 const usableRegex = /^https:\/\/www\.newgrounds.com\/audio\/listen\/(\d+)$/;
 
-/** @implements {PluginInterface} */
-class NewgroundsPlugin {
-	constructor() {
+class NewgroundsPlugin extends Plugin {
+	/**
+	 * @param {import("volcano-sdk/types").Logger} _
+	 * @param {import("volcano-sdk/types").Utils} utils
+	 */
+	constructor(_, utils) {
+		super(_, utils);
 		this.source = "newgrounds";
-		this.searchShort = "ng";
-	}
-
-	setVariables(_, utils) {
-		this.utils = utils;
+		this.searchShorts = ["ng"];
 	}
 
 	/**
 	 * @param {string} resource
-	 * @param {boolean} isResourceSearch
+	 * @param {string} [searchShort]
 	 */
-	canBeUsed(resource, isResourceSearch) {
-		return isResourceSearch || !!resource.match(usableRegex);
+	canBeUsed(resource, searchShort) {
+		return (searchShort && this.searchShorts.includes(searchShort)) || !!resource.match(usableRegex);
 	}
 
 	/**
-* @param {string} resource
-* @param {boolean} isResourceSearch
-*/
-	async infoHandler(resource, isResourceSearch) {
-		if (isResourceSearch) {
+	 * @param {string} resource
+	 * @param {string} [searchShort]
+	 */
+	async infoHandler(resource, searchShort) {
+		if (searchShort) {
 			const html = await fetch(`https://www.newgrounds.com/search/conduct/audio?suitables=etm&c=3&terms=${encodeURIComponent(resource)}`).then(res => res.text());
 			/** @type {HTMLElement} */
 			// @ts-ignore
@@ -103,7 +73,6 @@ class NewgroundsPlugin {
 		return { entries: [{ title: data.title, author: data.author, identifier: match[1], uri: data.sources[0].src, length: Math.round(data.duration * 1000), isStream: false }] };
 	}
 
-	/** @param {import("@lavalink/encoding").TrackInfo} info */
 	async streamHandler(info) {
 		if (!info.uri) throw new Error("NO_URI");
 		return { stream: await this.utils.connect(info.uri) };
