@@ -22,6 +22,6 @@
   "homepage": "https://github.com/AmandaDiscord/VolcanoPlugins#readme",
   "dependencies": {
     "@tcortega/twitter-scraper": "github:AmandaDiscord/twitter-scraper#e7ac0766f2fc53e6873401372dfe040e0ff33a3e",
-    "volcano-sdk": "github:AmandaDiscord/VolcanoSDK"
+    "volcano-sdk": "file:A:/Windows/Documents/GitHub/Volcano/packages/sdk"
   }
 }

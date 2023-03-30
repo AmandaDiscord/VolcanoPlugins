@@ -3,15 +3,8 @@ import { Plugin } from "volcano-sdk";
 const usableRegex = /^https:\/\/music\.apple\.com\/[^/]+\/(album|artist)\/[^/]+\/(\d+)(?:\?i=(\d+))?$/;
 
 class AppleMusicPlugin extends Plugin {
-	/**
-	 * @param {import("volcano-sdk/types").Logger} _
-	 * @param {import("volcano-sdk/types").Utils} utils
-	 */
-	constructor(_, utils) {
-		super(_, utils);
-		this.source = "itunes";
-		this.searchShorts = ["am"];
-	}
+	source = "itunes";
+	searchShorts = ["am"];
 
 	/**
 	 * @param {string} resource

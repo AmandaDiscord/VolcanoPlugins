@@ -6,15 +6,8 @@ const usableRegex = /^https:\/\/www\.deezer\.com\/\w+\/(track|album|artist)\/(\d
 const scriptSliceAfter = "window.__DZR_APP_STATE__ = ".length;
 
 class DeezerPlugin extends Plugin {
-	/**
-	 * @param {import("volcano-sdk/types").Logger} _
-	 * @param {import("volcano-sdk/types").Utils} utils
-	 */
-	constructor(_, utils) {
-		super(_, utils)
-		this.source = "deezer";
-		this.searchShorts = ["dz"];
-	}
+	source = "deezer";
+	searchShorts = ["dz"];
 
 	/**
 	 * @param {string} resource

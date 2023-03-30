@@ -22,6 +22,6 @@
   "homepage": "https://github.com/AmandaDiscord/VolcanoPlugins#readme",
   "dependencies": {
     "node-html-parser": "^6.0.0",
-    "volcano-sdk": "github:AmandaDiscord/VolcanoSDK"
+    "volcano-sdk": "file:A:/Windows/Documents/GitHub/Volcano/packages/sdk"
   }
 }

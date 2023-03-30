@@ -1,8 +1,8 @@
 {
-  "name": "volcano-itunes",
+  "name": "volcano-midi",
   "version": "1.0.0",
-  "description": "A plugin for Volcano to support playback from iTunes",
-  "main": "AppleMusicPlugin.js",
+  "description": "A plugin for Volcano to support loading and playback of midi files",
+  "main": "MidiPlugin.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
@@ -12,7 +12,7 @@
   },
   "keywords": [
     "volcano",
-    "itunes"
+    "midi"
   ],
   "author": "PapiOphidian",
   "license": "MIT",
@@ -21,6 +21,7 @@
   },
   "homepage": "https://github.com/AmandaDiscord/VolcanoPlugins#readme",
   "dependencies": {
+    "synth-js": "^0.1.2",
     "volcano-sdk": "file:A:/Windows/Documents/GitHub/Volcano/packages/sdk"
   }
 }

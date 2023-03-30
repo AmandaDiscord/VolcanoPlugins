@@ -1,5 +1,3 @@
-import { isMainThread } from "worker_threads";
-
 import { TwitterScraper } from "@tcortega/twitter-scraper";
 
 import { Plugin } from "volcano-sdk";
@@ -8,17 +6,10 @@ const usableRegex = /^https:\/\/twitter.com\/([^/]+)\/status\/(\d+)/;
 const twitterCoRegex = /https:\/\/t.co\/\w+/;
 
 class TwitterPlugin extends Plugin {
-	/**
-	 * @param {import("volcano-sdk/types").Logger} _
-	 * @param {import("volcano-sdk/types").Utils} utils
-	 */
-	constructor(_, utils) {
-		super(_, utils);
-		this.source = "twitter";
-	}
+	source = "twitter";
 
 	async initialize() {
-		if (isMainThread) this.twitter = await TwitterScraper.create();
+		this.twitter = await TwitterScraper.create();
 	}
 
 	/**

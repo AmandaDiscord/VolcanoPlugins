@@ -5,15 +5,8 @@ import htmlParse from "node-html-parser";
 const usableRegex = /^https:\/\/www\.newgrounds.com\/audio\/listen\/(\d+)$/;
 
 class NewgroundsPlugin extends Plugin {
-	/**
-	 * @param {import("volcano-sdk/types").Logger} _
-	 * @param {import("volcano-sdk/types").Utils} utils
-	 */
-	constructor(_, utils) {
-		super(_, utils);
-		this.source = "newgrounds";
-		this.searchShorts = ["ng"];
-	}
+	source = "newgrounds";
+	searchShorts = ["ng"];
 
 	/**
 	 * @param {string} resource
