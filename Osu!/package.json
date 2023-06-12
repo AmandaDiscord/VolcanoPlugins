@@ -1,0 +1,26 @@
+{
+    "name": "volcano-spotify-plus",
+    "version": "1.0.0",
+    "description": "A plugin for Volcano to support playback from osu! beatmaps",
+    "main": "OsuSongs.js",
+    "scripts": {
+        "test": "echo \"Error: no test specified\" && exit 1"
+    },
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/AmandaDiscord/VolcanoPlugins.git"
+    },
+    "keywords": [
+        "volcano",
+        "spotify"
+    ],
+    "author": "TareHimself",
+    "license": "MIT",
+    "bugs": {
+        "url": "https://github.com/AmandaDiscord/VolcanoPlugins/issues"
+    },
+    "homepage": "https://github.com/AmandaDiscord/VolcanoPlugins#readme",
+    "dependencies": {
+        "volcano-sdk": "https://github.com/AmandaDiscord/VolcanoSDK"
+    }
+}

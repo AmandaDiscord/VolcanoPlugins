@@ -11,10 +11,13 @@ class SpotifyPlusPlugin extends Plugin {
 	source = 'spotify+';
 	searchShorts = ['sp+'];
 	ytMusicApi = new YTMusic.default();
-	ytIsInitialized = false;
 
 	/** @type { undefined | {token: string; expire: string;}} */
 	currentToken = undefined;
+
+	async initialize() {
+		await this.ytMusicApi.initialize();
+	}
 
 	/**
 	 * @param {string} resource
@@ -46,7 +49,7 @@ class SpotifyPlusPlugin extends Plugin {
 			uris.map((a) => {
 				return (async () => {
 					const results = await this.ytMusicApi.searchSongs(
-						`${a.title} by ${a.author}`.trim()
+						`${a.title} by ${a.author} , OFFICIAL`.trim()
 					);
 
 					a.uri = `https://youtube.com/watch?v=${results[0]?.videoId ?? ''}`;
@@ -65,10 +68,6 @@ class SpotifyPlusPlugin extends Plugin {
 	 * @param {string} [searchShort]
 	 */
 	async infoHandler(resource, searchShort) {
-		if (!this.ytIsInitialized) {
-			await this.ytMusicApi.initialize();
-			this.ytIsInitialized = true;
-		}
 		const { token, expire } = await this.getToken();
 		const [_, resourceType, resourceId] = resource.match(usableRegex);
 		const headers = {
@@ -76,6 +75,7 @@ class SpotifyPlusPlugin extends Plugin {
 		};
 		/** @type {import("volcano-sdk/types").TrackInfo[]} */
 		const tracks = [];
+		let plData = undefined;
 		if (resourceType === 'track') {
 			const response = await fetch(
 				`https://api.spotify.com/v1/tracks/${resourceId}`,
@@ -95,6 +95,10 @@ class SpotifyPlusPlugin extends Plugin {
 			};
 			tracks.push(newTrack);
 		} else if (resourceType === 'album') {
+			plData = {
+				name: "",
+				selectedTrack: 0;
+			}
 			const response = await fetch(
 				`https://api.spotify.com/v1/albums/${resourceId}/tracks`,
 				{
@@ -116,6 +120,11 @@ class SpotifyPlusPlugin extends Plugin {
 				})
 			);
 		} else if (resourceType === 'playlist') {
+			plData = {
+				name: "",
+				selectedTrack: 0;
+			}
+			
 			const response = await fetch(
 				`https://api.spotify.com/v1/playlists/${resourceId}/tracks`,
 				{
@@ -140,7 +149,7 @@ class SpotifyPlusPlugin extends Plugin {
 
 		const loaded = await this.loadUris(tracks);
 
-		return { entries: loaded };
+		return { entries: loaded, plData: plData };
 	}
 
 	async streamHandler(info, usingFFMPEG) {
