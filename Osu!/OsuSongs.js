@@ -8,6 +8,7 @@ const MAX_URI_TRIES = 10;
 class OsuSongsPlugin extends Plugin {
 	source = 'osu-songs';
 	searchShorts = ['os'];
+
 	ytMusicApi = new YTMusic.default();
 
 	async initialize() {
@@ -34,7 +35,13 @@ class OsuSongsPlugin extends Plugin {
 
 					a.uri = `https://youtube.com/watch?v=${results[0]?.videoId ?? ''}`;
 					a.length = (results[0]?.duration ?? 0) * 1000;
-
+					a.name = results[0]?.name ?? a.name;
+					a.author =
+						results[0]?.artists
+							.reduce((t, a) => {
+								return t + ` ${a.name}`;
+							}, '')
+							.trim() ?? a.artist;
 					return a;
 				})();
 			})
