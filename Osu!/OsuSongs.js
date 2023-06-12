@@ -79,8 +79,6 @@ class OsuSongsPlugin extends Plugin {
 			isStream: false,
 		});
 
-		console.log(tracks);
-
 		const loaded = await this.loadUris(tracks);
 
 		return { entries: loaded };
