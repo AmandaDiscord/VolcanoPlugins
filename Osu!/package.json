@@ -1,5 +1,5 @@
 {
-    "name": "volcano-spotify-plus",
+    "name": "volcano-osu-songs",
     "version": "1.0.0",
     "description": "A plugin for Volcano to support playback from osu! beatmaps",
     "main": "OsuSongs.js",

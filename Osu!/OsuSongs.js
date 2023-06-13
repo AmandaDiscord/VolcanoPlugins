@@ -7,7 +7,6 @@ const MAX_URI_TRIES = 10;
 
 class OsuSongsPlugin extends Plugin {
 	source = 'osu-songs';
-	searchShorts = ['os'];
 
 	ytMusicApi = new YTMusic.default();
 

@@ -3,13 +3,12 @@ import YTMusic from 'ytmusic-api';
 import * as dl from 'play-dl';
 
 const usableRegex =
-	/^https:\/\/open\.spotify\.com\/([a-zA-Z0-9]+)\/([a-zA-Z0-9]+)/;
+	/^https:\/\/open\.spotify\.com\/(track|album|playlist)\/([a-zA-Z0-9]+)/;
 
 const MAX_URI_TRIES = 10;
 
 class SpotifyPlusPlugin extends Plugin {
 	source = 'spotify+';
-	searchShorts = ['sp+'];
 	ytMusicApi = new YTMusic.default();
 
 	/** @type { undefined | {token: string; expire: string;}} */
