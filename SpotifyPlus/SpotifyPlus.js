@@ -82,7 +82,6 @@ class SpotifyPlusPlugin extends Plugin {
 					headers: headers,
 				}
 			).then((a) => a.json());
-
 			/** @type {import("volcano-sdk/types").TrackInfo} */
 			const newTrack = {
 				uri: '',
@@ -95,16 +94,15 @@ class SpotifyPlusPlugin extends Plugin {
 			tracks.push(newTrack);
 		} else if (resourceType === 'album') {
 			plData = {
-				name: "",
-				selectedTrack: 0;
-			}
+				name: '',
+				selectedTrack: 0,
+			};
 			const response = await fetch(
 				`https://api.spotify.com/v1/albums/${resourceId}/tracks`,
 				{
 					headers: headers,
 				}
 			).then((a) => a.json());
-
 			tracks.push(
 				...response.items.map((a) => {
 					const item = a;
@@ -120,10 +118,10 @@ class SpotifyPlusPlugin extends Plugin {
 			);
 		} else if (resourceType === 'playlist') {
 			plData = {
-				name: "",
-				selectedTrack: 0;
-			}
-			
+				name: '',
+				selectedTrack: 0,
+			};
+
 			const response = await fetch(
 				`https://api.spotify.com/v1/playlists/${resourceId}/tracks`,
 				{
