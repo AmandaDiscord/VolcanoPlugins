@@ -1,4 +1,4 @@
-import { Transform, Readable } from "stream";
+import { Readable } from "node:stream";
 
 import { Plugin } from "volcano-sdk";
 import synth from "synth-js";
@@ -24,7 +24,7 @@ class MidiPlugin extends Plugin {
 	}
 
 	/**
-	 * @param {import("@lavalink/encoding").TrackInfo} info
+	 * @param {import("volcano-encoding").TrackInfo} info
 	 */
 	async streamHandler(info) {
 		const data = await fetch(info.identifier).then(d => d.arrayBuffer());

@@ -14,12 +14,13 @@ class DeezerPlugin extends Plugin {
 	 * @param {string} [searchShort]
 	 */
 	canBeUsed(resource, searchShort) {
-		return (searchShort && this.searchShorts.includes(searchShort)) || !!resource.match(usableRegex);
+		return (searchShort && this.searchShorts.includes(searchShort)) || !!usableRegex.exec(resource);
 	}
 
 	/**
 	 * @param {string} resource
 	 * @param {string} [searchShort]
+	 * @returns {Promise<import("volcano-sdk/types").TrackData>}
 	 */
 	async infoHandler(resource, searchShort) {
 		const html = await fetch(searchShort ? `https://www.deezer.com/search/${encodeURIComponent(resource)}` : resource).then(d => d.text());
@@ -28,16 +29,21 @@ class DeezerPlugin extends Plugin {
 		else if (data.DATA.__TYPE__ === "song") return { entries: [DeezerPlugin.trackToResource(data.DATA)] };
 		else if (data.DATA.__TYPE__ === "album") {
 			const value = { entries: data.SONGS.data.map(DeezerPlugin.trackToResource) };
+			// @ts-expect-error
 			value.plData = { name: data.DATA.ALB_TITLE };
 			return value;
 		} else if (data.DATA.__TYPE__ === "artist") return { entries: data.TOP.data.map(DeezerPlugin.trackToResource) };
 		else throw new Error("UNKNOWN_OR_UNSUPPORTED_DEEZER_RESOURCE");
 	}
 
+	/**
+	 * @param {import("volcano-encoding").TrackInfo} info
+	 */
 	async streamHandler(info) {
 		if (!info.uri) throw new Error("NO_URI");
 		const html = await fetch(info.uri).then(d => d.text());
 		const data = DeezerPlugin.parse(html);
+		// @ts-expect-error
 		const chosen = data.DATA.MEDIA.find(i => i.TYPE !== "preview") || data.DATA.MEDIA[0];
 		return { stream: await this.utils.connect(chosen.HREF) };
 	}
@@ -45,18 +51,19 @@ class DeezerPlugin extends Plugin {
 	/** @param {string} html */
 	static parse(html) {
 		/** @type {HTMLElement} */
-		// @ts-ignore
+		// @ts-expect-error
 		const parser = htmlParse.default(html);
 		const body = parser.getElementsByTagName("body")[0];
 		const dzrApp = body.querySelector("div[id=\"dzr-app\"]");
 		const naboo = dzrApp?.querySelector("div[id=\"naboo_content\"]")
-		const script = ([...(naboo?.querySelectorAll("script")?.values() || [])]).slice(-1)[0];
+		const script = ([...(naboo?.querySelectorAll("script")?.values() || [])]).at(-1);
 		const json = script?.innerText.slice(scriptSliceAfter);
 		const data = json ? JSON.parse(json) : {};
 		if (!data.DATA && !data.QUERY) throw new Error("CANNOT_EXTRACT_DEEZER_INFO");
 		return data;
 	}
 
+	// @ts-expect-error
 	static trackToResource(track) {
 		return {
 			title: track.SNG_TITLE,

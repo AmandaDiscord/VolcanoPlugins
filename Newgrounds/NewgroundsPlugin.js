@@ -13,7 +13,7 @@ class NewgroundsPlugin extends Plugin {
 	 * @param {string} [searchShort]
 	 */
 	canBeUsed(resource, searchShort) {
-		return (searchShort && this.searchShorts.includes(searchShort)) || !!resource.match(usableRegex);
+		return (searchShort && this.searchShorts.includes(searchShort)) || !!usableRegex.exec(resource);
 	}
 
 	/**
@@ -24,18 +24,18 @@ class NewgroundsPlugin extends Plugin {
 		if (searchShort) {
 			const html = await fetch(`https://www.newgrounds.com/search/conduct/audio?suitables=etm&c=3&terms=${encodeURIComponent(resource)}`).then(res => res.text());
 			/** @type {HTMLElement} */
-			// @ts-ignore
+			// @ts-expect-error
 			const parser = htmlParse.default(html);
 			const h = parser.childNodes[1];
 			/** @type {Array<HTMLElement>} */
-			// @ts-ignore
+			// @ts-expect-error
 			const arr = [...h.childNodes.values()];
 			const resultsContainer = arr.find(i => i.id?.startsWith("search_results_container_"));
 			if (!resultsContainer) throw new Error("CANNOT_EXTRACT_NEWGROUNDS_INFO");
 			const itemList = resultsContainer.querySelector("ul[class=\"itemlist spaced\"]");
 			if (!itemList) throw new Error("CANNOT_EXTRACT_NEWGROUNDS_INFO");
 			/** @type {Array<HTMLElement>} */
-			// @ts-ignore
+			// @ts-expect-error
 			const childNodes = [...itemList.childNodes.values()];
 			/** @type {Array<string>} */
 			const ids = [];
@@ -43,7 +43,7 @@ class NewgroundsPlugin extends Plugin {
 				if (node.id !== "") continue;
 				const url = node.querySelector("a[class=\"item-audiosubmission \"]")?.getAttribute("href");
 				if (!url) continue;
-				const match = url.match(usableRegex);
+				const match = usableRegex.exec(url);
 				if (!match) continue;
 				ids.push(match[1]);
 			}
@@ -60,12 +60,15 @@ class NewgroundsPlugin extends Plugin {
 			}));
 			return { entries: results };
 		}
-		const match = resource.match(usableRegex);
+		const match = usableRegex.exec(resource);
 		if (!match) throw new Error("CANNOT_EXTRACT_NEWGROUNDS_INFO");
 		const data = await fetch(`https://www.newgrounds.com/audio/load/${match[1]}/3`, { headers: { "X-Requested-With": "XMLHttpRequest" } }).then(d => d.json());
 		return { entries: [{ title: data.title, author: data.author, identifier: match[1], uri: data.sources[0].src, length: Math.round(data.duration * 1000), isStream: false }] };
 	}
 
+	/**
+	 * @param {import("volcano-encoding").TrackInfo} info
+	 */
 	async streamHandler(info) {
 		if (!info.uri) throw new Error("NO_URI");
 		return { stream: await this.utils.connect(info.uri) };

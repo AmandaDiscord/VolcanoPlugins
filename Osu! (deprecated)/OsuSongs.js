@@ -59,7 +59,7 @@ class OsuSongsPlugin extends Plugin {
 
 		const html = await fetch(resource).then((r) => r.text());
 		/** @type {HTMLElement} */
-		// @ts-ignore
+		// @ts-expect-error
 		const parser = htmlParse.default(html);
 		const targetElement = parser.querySelector('meta[name="description"]');
 		if (!targetElement) {

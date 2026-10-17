@@ -22,6 +22,7 @@
   "homepage": "https://github.com/AmandaDiscord/VolcanoPlugins#readme",
   "dependencies": {
     "synth-js": "^0.1.2",
-    "volcano-sdk": "file:A:/Windows/Documents/GitHub/Volcano/packages/sdk"
+    "volcano-sdk": "file:A:/Windows/Documents/GitHub/Volcano/packages/sdk",
+    "volcano-encoding": "file:A:/Windows/Documents/GitHub/Volcano/packages/encoding"
   }
 }
